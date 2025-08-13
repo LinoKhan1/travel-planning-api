@@ -1,0 +1,40 @@
+{
+  "name": "travel-planning-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "test": "jest",
+    "lint":"eslint src tests",
+    "format": "prettier --write 'src tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "apollo-server": "^3.13.0",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "graphql": "^16.11.0",
+    "lru-cache": "^11.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.2.1",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
+    "eslint": "^9.33.0",
+    "jest": "^30.0.5",
+    "nock": "^14.0.10",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.1"
+  }
+}
