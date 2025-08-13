@@ -6,14 +6,16 @@
     "start": "ts-node src/index.ts",
     "build": "tsc",
     "test": "jest",
-    "lint":"eslint src tests",
-    "format": "prettier --write 'src tests"
+    "lint": "eslint src tests",
+    "format": "prettier --write 'src tests",
+    "codegen": "graphql-codegen --config codegen.yml"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@graphql-tools/schema": "^10.0.25",
     "apollo-server": "^3.13.0",
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
@@ -24,6 +26,9 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/typescript-resolvers": "^4.5.1",
     "@types/axios": "^0.9.36",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.2.1",

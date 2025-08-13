@@ -1,0 +1,35 @@
+type City {
+  id: ID!
+  name: String!
+  latitude: Float!
+  longitude: Float!
+  country: String
+  population: Int
+}
+
+type WeatherForecast {
+  date: String!
+  temperatureMax: Float!
+  temperatureMin: Float!
+  precipitationSum: Float!
+  windSpeedMax: Float!
+}
+
+type Activity {
+  type: ActivityType!
+  rank: Int!
+  suitabilityScore: Float!
+}
+
+enum ActivityType {
+  SKIING
+  SURFING
+  INDOOR_SIGHTSEEING
+  OUTDOOR_SIGHTSEEING
+}
+
+type Query {
+  citySuggestions(query: String!, limit: Int = 10, offset: Int = 0): [City!]!
+  weatherForecast(cityLatitude: Float!, cityLongitude: Float!, forecastDays: Int = 7): [WeatherForecast!]!
+  activityRanking(cityLatitude: Float!, cityLongitude: Float!, forecastDays: Int = 7): [Activity!]!
+}
