@@ -103,39 +103,39 @@ This structure supports extensibility, simplifies debugging, and ensures robust 
 
 ## Technical Choices
 
-- **Node.js: Stable runtime for backend development.** 
-- **TypeScript: Ensures type safety with codegen for GraphQL schema types.**
-- **Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.**
-- **GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.**
-- **Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).**
-- **Dotenv: Manages environment variables (dotenv@17.2.1).**
-- **Winston: Structured logging for debugging and monitoring.**
-- **lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.**
-- **Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.**
-- **Nock: Mocks Open-Meteo API calls for reliable, offline tests.**
-- **ESLint/Prettier: Enforce TypeScript best practices and formatting.**
-- **ts-node: Runs TypeScript during development.**
-- **Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.**
+- Node.js: Stable runtime for backend development.
+- TypeScript: Ensures type safety with codegen for GraphQL schema types.**
+- **Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.
+- GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.
+- Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).
+- **Dotenv: Manages environment variables (dotenv@17.2.1).
+- Winston: Structured logging for debugging and monitoring.**
+- lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.
+- Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.
+- Nock: Mocks Open-Meteo API calls for reliable, offline tests.
+- ESLint/Prettier: Enforce TypeScript best practices and formatting.
+- ts-node: Runs TypeScript during development.
+- Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.
 
 These choices prioritize performance, developer experience, and alignment with the project’s requirements.
 
 ## Omissions and Trade-offs
 
-- **Omitted Redis: Used lru-cache for simplicity, as deployment isn’t required. Trade-off: Less suitable for distributed systems but sufficient for moderate load (1000 req/min).**
-- **Omitted Authentication: Not required by the assessment. Trade-off: Limits user-specific features but simplifies implementation.**
-- **Simplified Activity Ranking: Heuristic-based algorithm (temperature, precipitation, wind speed) instead of machine learning. Trade-off: Less precise but faster to implement.**
-- **Limited City Filters: Basic pagination (limit/offset) without advanced filters (e.g., by country). Trade-off: Reduced flexibility but meets core requirements.**
-- **Fixed Cache Issue: Resolved undefined cache error in OpenMeteoDataSource by mocking lru-cache and ensuring constructor initialization. Trade-off: Added test complexity but ensured reliability.**
-- **Worker Process Warning: Fixed by using Jest fake timers in OpenMeteoDataSource.test.ts. Trade-off: Simplified testing but requires careful timer management.**
+- Omitted Redis: Used lru-cache for simplicity, as deployment isn’t required. Trade-off: Less suitable for distributed systems but sufficient for moderate load (1000 req/min).
+- Omitted Authentication: Not required by the assessment. Trade-off: Limits user-specific features but simplifies implementation.
+- Simplified Activity Ranking: Heuristic-based algorithm (temperature, precipitation, wind speed) instead of machine learning. Trade-off: Less precise but faster to implement.
+- Limited City Filters: Basic pagination (limit/offset) without advanced filters (e.g., by country). Trade-off: Reduced flexibility but meets core requirements.
+- Fixed Cache Issue: Resolved undefined cache error in OpenMeteoDataSource by mocking lru-cache and ensuring constructor initialization. Trade-off: Added test complexity but ensured reliability.
+- Worker Process Warning: Fixed by using Jest fake timers in OpenMeteoDataSource.test.ts. Trade-off: Simplified testing but requires careful timer management.
 
 ## Potential Improvements
 
-- **Distributed Caching: Integrate Redis for scalable, persistent caching.**
-- **Query Complexity Limits: Use Apollo plugins to prevent complex query attacks.**
-- **Additional Features: Add mutations for saving travel plans or filters for city suggestions.**
-- **Monitoring: Integrate Prometheus for metrics and advanced logging.**
-- **Integration Tests: Expand tests/integration/ with more end-to-end scenarios.**
-- **Schema Extensions: Add types/queries for hotel recommendations or travel itineraries.**
+- Distributed Caching: Integrate Redis for scalable, persistent caching.
+- Query Complexity Limits: Use Apollo plugins to prevent complex query attacks.
+- Additional Features: Add mutations for saving travel plans or filters for city suggestions.
+- Monitoring: Integrate Prometheus for metrics and advanced logging.
+- Integration Tests: Expand tests/integration/ with more end-to-end scenarios.
+- Schema Extensions: Add types/queries for hotel recommendations or travel itineraries.
 
 ## Use of AI
 I led the design and development of this project, adopting a modular structure and ensuring all implementation decisions aligned with project goals and best practices. Grok—an AI assistant developed by xAI—was used as a collaborative tool, with its suggestions guided, reviewed, and refined before implementation.
