@@ -144,10 +144,11 @@ I guided the AI in terms of directions to follow, ensuring alignment with projec
 ## Query Examples
 Below are sample GraphQL queries for the implemented features, using the schema defined in src/schema/types.ts.
 1. City Suggestions
+
+Search for cities matching "Par" with pagination:
 ```sh
-Search for cities matching "Paris" with pagination:
 query {
-  citySuggestions(query: "Paris", limit: 2, offset: 0) {
+  citySuggestions(query: "Par", limit: 2, offset: 0) {
     id
     name
     latitude
@@ -163,20 +164,20 @@ Example Response:
   "data": {
     "citySuggestions": [
       {
-        "id": "123",
+        "id": "2988507",
         "name": "Paris",
         "latitude": 48.85341,
         "longitude": 2.3488,
         "country": "France",
-        "population": 2165423
+        "population": 2138551
       },
       {
-        "id": "124",
-        "name": "Paris, TX",
-        "latitude": 33.66094,
-        "longitude": -95.55551,
-        "country": "USA",
-        "population": 24782
+        "id": "2640623",
+        "name": "Par",
+        "latitude": 50.35107,
+        "longitude": -4.70288,
+        "country": "United Kingdom",
+        "population": 9462
       }
     ]
   }
@@ -201,25 +202,25 @@ Example Response:
   "data": {
     "weatherForecast": [
       {
-        "date": "2025-08-15",
-        "temperatureMax": 25.5,
-        "temperatureMin": 15.5,
+        "date": "2025-08-14",
+        "temperatureMax": 31.2,
+        "temperatureMin": 21.4,
         "precipitationSum": 0,
-        "windSpeedMax": 14.5
+        "windSpeedMax": 13.6
+      },
+      {
+        "date": "2025-08-15",
+        "temperatureMax": 32.1,
+        "temperatureMin": 18.8,
+        "precipitationSum": 0,
+        "windSpeedMax": 13
       },
       {
         "date": "2025-08-16",
-        "temperatureMax": 26.0,
-        "temperatureMin": 16.0,
-        "precipitationSum": 2.0,
-        "windSpeedMax": 12.0
-      },
-      {
-        "date": "2025-08-17",
-        "temperatureMax": 24.5,
-        "temperatureMin": 14.5,
+        "temperatureMax": 28.8,
+        "temperatureMin": 18.1,
         "precipitationSum": 0,
-        "windSpeedMax": 13.5
+        "windSpeedMax": 15.8
       }
     ]
   }
@@ -249,19 +250,19 @@ Example Response:
       {
         "type": "INDOOR_SIGHTSEEING",
         "rank": 2,
-        "suitabilityScore": 0.7
+        "suitabilityScore": 0.3
       },
       {
-        "type": "SKIING",
+        "type": "SURFING",
         "rank": 3,
         "suitabilityScore": 0.2
       },
       {
-        "type": "SURFING",
+        "type": "SKIING",
         "rank": 4,
         "suitabilityScore": 0.1
       }
     ]
   }
-```
 }
+```
