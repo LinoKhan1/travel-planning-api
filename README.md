@@ -14,9 +14,9 @@ A GraphQL API for a travel planning application, providing dynamic city suggesti
 ## Overview
 This project implements a GraphQL API for a travel planning application, supporting three core features:
 
-Dynamic City Suggestions: Returns city matches based on partial or complete user input using Open-Meteo’s geocoding API, with results cached for performance.
-Weather Forecasts: Provides daily weather forecasts (temperature, precipitation, wind speed) for a selected city via Open-Meteo’s forecast API, with retry logic for reliability.
-Activity Ranking: Ranks activities (outdoor sightseeing, indoor sightseeing, skiing, surfing) based on weather conditions, using a heuristic-based algorithm.
+- Dynamic City Suggestions: Returns city matches based on partial or complete user input using Open-Meteo’s geocoding API, with results cached for performance.
+- Weather Forecasts: Provides daily weather forecasts (temperature, precipitation, wind speed) for a selected city via Open-Meteo’s forecast API, with retry logic for reliability.
+- Activity Ranking: Ranks activities (outdoor sightseeing, indoor sightseeing, skiing, surfing) based on weather conditions, using a heuristic-based algorithm.
 
 The API is built with scalability, maintainability, and testability in mind, leveraging TypeScript for type safety (with codegen for schema types), Apollo Server for GraphQL, and Jest/Supertest for comprehensive unit and integration testing. The codebase adheres to best practices, with modular architecture, robust error handling, and in-memory caching to optimize API calls.
 Setup Instructions
