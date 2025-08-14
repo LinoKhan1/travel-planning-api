@@ -98,18 +98,18 @@ This structure supports extensibility, simplifies debugging, and ensures robust 
 ## Technical Choices
 
 - **Node.js: Stable runtime for backend development.** 
--**TypeScript: Ensures type safety with codegen for GraphQL schema types.**
--**Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.**
--**GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.**
--**Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).**
--**Dotenv: Manages environment variables (dotenv@17.2.1).**
--**Winston: Structured logging for debugging and monitoring.**
--**lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.**
--**Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.**
--**Nock: Mocks Open-Meteo API calls for reliable, offline tests.**
--**ESLint/Prettier: Enforce TypeScript best practices and formatting.**
--**ts-node: Runs TypeScript during development.**
--**Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.**
+- **TypeScript: Ensures type safety with codegen for GraphQL schema types.**
+- **Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.**
+- **GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.**
+- **Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).**
+- **Dotenv: Manages environment variables (dotenv@17.2.1).**
+- **Winston: Structured logging for debugging and monitoring.**
+- **lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.**
+- **Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.**
+- **Nock: Mocks Open-Meteo API calls for reliable, offline tests.**
+- **ESLint/Prettier: Enforce TypeScript best practices and formatting.**
+- **ts-node: Runs TypeScript during development.**
+- **Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.**
 
 These choices prioritize performance, developer experience, and alignment with the project’s requirements.
 
