@@ -1,4 +1,3 @@
-
 import { OpenMeteoDataSource } from '../../src/datasources/OpenMeteoDataSource';
 import nock from 'nock';
 import { City, WeatherForecast } from '../../src/schema/types';
@@ -12,16 +11,16 @@ describe('OpenMeteoDataSource', () => {
   let dataSource: OpenMeteoDataSource;
 
   beforeEach(() => {
-    // Initialize data source before each test
+    // Initialize data source
     dataSource = new OpenMeteoDataSource();
-    // Clear cache to ensure test isolation
+    // Clear cache for isolation
     (dataSource as any).cache = new LRUCache({
       max: 1000,
       ttl: 1000 * 60 * 60,
     });
-    // Use Jest fake timers for TTL testing
+    // Use fake timers for TTL
     jest.useFakeTimers();
-    // Ensure nock is disabled for real network requests
+    // Prevent real network requests
     nock.disableNetConnect();
   });
 
@@ -29,6 +28,7 @@ describe('OpenMeteoDataSource', () => {
     // Clean up mocks and timers
     nock.cleanAll();
     nock.enableNetConnect();
+    jest.runAllTimers();
     jest.clearAllTimers();
     jest.useRealTimers();
   });
@@ -39,7 +39,7 @@ describe('OpenMeteoDataSource', () => {
       expect(dataSource['client'].defaults.baseURL).toBe('https://geocoding-api.open-meteo.com/v1');
       expect(dataSource['cache']).toBeInstanceOf(LRUCache);
       expect(dataSource['cache'].max).toBe(1000);
-    }, 10000); // Increased timeout
+    }, 10000);
   });
 
   describe('searchCities', () => {
@@ -58,7 +58,7 @@ describe('OpenMeteoDataSource', () => {
       };
       nock('https://geocoding-api.open-meteo.com')
         .get('/v1/search')
-        .query({ name: 'Paris', count: 2, language: 'en' })
+        .query({ name: 'Paris', count: '2', language: 'en' })
         .reply(200, mockResponse);
 
       const result = await dataSource.searchCities('Paris', 2);
@@ -74,8 +74,8 @@ describe('OpenMeteoDataSource', () => {
       ];
       expect(result).toEqual(expected);
       expect(dataSource['cache'].get('city:Paris:2')).toEqual(expected);
-      expect(nock.activeMocks().length).toBe(0); // Ensure mock is consumed
-    }, 10000); // Increased timeout
+      expect(nock.pendingMocks().length).toBe(0);
+    }, 10000);
 
     it('should return cached cities if available', async () => {
       const cachedCities: City[] = [
@@ -90,32 +90,31 @@ describe('OpenMeteoDataSource', () => {
       ];
       dataSource['cache'].set('city:Paris:2', cachedCities);
 
-      // No nock mock to ensure no API call
       const result = await dataSource.searchCities('Paris', 2);
       expect(result).toEqual(cachedCities);
-      expect(nock.activeMocks().length).toBe(0); // No API call made
+      expect(nock.pendingMocks().length).toBe(0);
     }, 10000);
 
     it('should return empty array for no results and cache it', async () => {
       nock('https://geocoding-api.open-meteo.com')
         .get('/v1/search')
-        .query({ name: 'NonExistent', count: 2, language: 'en' })
+        .query({ name: 'NonExistent', count: '2', language: 'en' })
         .reply(200, { results: [] });
 
       const result = await dataSource.searchCities('NonExistent', 2);
       expect(result).toEqual([]);
       expect(dataSource['cache'].get('city:NonExistent:2')).toEqual([]);
-      expect(nock.activeMocks().length).toBe(0);
+      expect(nock.pendingMocks().length).toBe(0);
     }, 10000);
 
     it('should throw error for network failure', async () => {
       nock('https://geocoding-api.open-meteo.com')
         .get('/v1/search')
-        .query({ name: 'Paris', count: 2, language: 'en' })
-        .replyWithError('Network Error');
+        .query({ name: 'Paris', count: '2', language: 'en' })
+        .replyWithError({ message: 'Network Error', code: 'ECONNABORTED' });
 
       await expect(dataSource.searchCities('Paris', 2)).rejects.toThrow('Failed to fetch cities: Network Error');
-      expect(nock.activeMocks().length).toBe(0);
+      expect(nock.pendingMocks().length).toBe(0);
     }, 10000);
   });
 
@@ -133,11 +132,11 @@ describe('OpenMeteoDataSource', () => {
       nock('https://api.open-meteo.com')
         .get('/v1/forecast')
         .query({
-          latitude: 48.85341,
-          longitude: 2.3488,
+          latitude: '48.85341',
+          longitude: '2.3488',
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
           timezone: 'auto',
-          forecast_days: 1,
+          forecast_days: '1',
         })
         .reply(200, mockResponse);
 
@@ -153,7 +152,7 @@ describe('OpenMeteoDataSource', () => {
       ];
       expect(result).toEqual(expected);
       expect(dataSource['cache'].get('forecast:48.85341:2.3488:1')).toEqual(expected);
-      expect(nock.activeMocks().length).toBe(0);
+      expect(nock.pendingMocks().length).toBe(0);
     }, 10000);
 
     it('should return cached forecast if available', async () => {
@@ -168,47 +167,46 @@ describe('OpenMeteoDataSource', () => {
       ];
       dataSource['cache'].set('forecast:48.85341:2.3488:1', cachedForecast);
 
-      // No nock mock to ensure no API call
       const result = await dataSource.getWeatherForecast(48.85341, 2.3488, 1);
       expect(result).toEqual(cachedForecast);
-      expect(nock.activeMocks().length).toBe(0);
+      expect(nock.pendingMocks().length).toBe(0);
     }, 10000);
 
     it('should throw error for invalid coordinates', async () => {
       nock('https://api.open-meteo.com')
         .get('/v1/forecast')
         .query({
-          latitude: 999,
-          longitude: 2.3488,
+          latitude: '999',
+          longitude: '2.3488',
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
           timezone: 'auto',
-          forecast_days: 1,
+          forecast_days: '1',
         })
         .reply(400, { error: 'Invalid latitude' });
 
       await expect(dataSource.getWeatherForecast(999, 2.3488, 1)).rejects.toThrow('Failed to fetch weather forecast: Request failed with status code 400');
-      expect(nock.activeMocks().length).toBe(0);
+      expect(nock.pendingMocks().length).toBe(0);
     }, 10000);
 
     it('should retry on 429 rate limit and succeed', async () => {
       nock('https://api.open-meteo.com')
-        .persist() // Persist for retries
         .get('/v1/forecast')
         .query({
-          latitude: 48.85341,
-          longitude: 2.3488,
+          latitude: '48.85341',
+          longitude: '2.3488',
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
           timezone: 'auto',
-          forecast_days: 1,
+          forecast_days: '1',
         })
-        .reply(429)
+        .times(2)
+        .reply(429, { error: 'Too many requests' })
         .get('/v1/forecast')
         .query({
-          latitude: 48.85341,
-          longitude: 2.3488,
+          latitude: '48.85341',
+          longitude: '2.3488',
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
           timezone: 'auto',
-          forecast_days: 1,
+          forecast_days: '1',
         })
         .reply(200, {
           daily: {
@@ -223,9 +221,8 @@ describe('OpenMeteoDataSource', () => {
       const result = await dataSource.getWeatherForecast(48.85341, 2.3488, 1);
       expect(result).toHaveLength(1);
       expect(result[0].date).toBe('2025-08-14');
-      expect(nock.activeMocks().length).toBe(0);
-      nock.cleanAll(); // Clean up persisted mocks
-    }, 15000); // Increased timeout for retries
+      expect(nock.pendingMocks().length).toBe(0);
+    }, 15000);
 
     it('should handle cache TTL expiration', async () => {
       const cachedForecast: WeatherForecast[] = [
@@ -237,19 +234,20 @@ describe('OpenMeteoDataSource', () => {
           windSpeedMax: 14.5,
         },
       ];
-      dataSource['cache'].set('forecast:48.85341:2.3488:1', cachedForecast, { ttl: 1000 }); // Set short TTL for test
+      dataSource['cache'].set('forecast:48.85341:2.3488:1', cachedForecast, { ttl: 1000 });
 
-      // Advance time beyond TTL (1 second)
+      // Advance time and run timers
       jest.advanceTimersByTime(2000);
+      jest.runAllTimers();
 
       nock('https://api.open-meteo.com')
         .get('/v1/forecast')
         .query({
-          latitude: 48.85341,
-          longitude: 2.3488,
+          latitude: '48.85341',
+          longitude: '2.3488',
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
           timezone: 'auto',
-          forecast_days: 1,
+          forecast_days: '1',
         })
         .reply(200, {
           daily: {
@@ -262,8 +260,8 @@ describe('OpenMeteoDataSource', () => {
         });
 
       const result = await dataSource.getWeatherForecast(48.85341, 2.3488, 1);
-      expect(result[0].temperatureMax).toBe(26.0); // New data, not cached
-      expect(nock.activeMocks().length).toBe(0);
+      expect(result[0].temperatureMax).toBe(26.0);
+      expect(nock.pendingMocks().length).toBe(0);
     }, 10000);
   });
 });
