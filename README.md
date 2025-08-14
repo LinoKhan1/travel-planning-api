@@ -137,13 +137,15 @@ These choices prioritize performance, developer experience, and alignment with t
 - **Schema Extensions: Add types/queries for hotel recommendations or travel itineraries.**
 
 ## Use of AI
-I guided the AI in terms of directions to follow, ensuring alignment with project requirements and best practices. Grok, an AI assistant developed by xAI, was instrumental in the development of this project, particularly in the following areas:
+I led the design and development of this project, adopting a modular structure and ensuring all implementation decisions aligned with project goals and best practices. Grok—an AI assistant developed by xAI—was used as a collaborative tool, with its suggestions guided, reviewed, and refined before implementation.
 
-- Accessing the Open-Meteo API: I asked Grok to access the Open Meteo API, and based on the documentation to provide a roadmap. Grok offered guidance on integrating with Open-Meteo’s geocoding and forecast APIs, including structuring HTTP requests and implementing retry logic for transient errors (e.g., 429, network issues).
-- Implementation Roadmap: Based on my request for Grok to access the Open Meteo API and provide a roadmap grounded in the documentation, Grok proposed a structured plan for implementation. This included prioritizing a modular architecture (presentation, business logic, data access layers), defining the GraphQL schema with TypeScript codegen, and implementing heuristic-based activity ranking. The roadmap guided the development of resolvers.ts, activityRanking.ts, and the testing strategy.
-- Evaluation and Validation: Each output from Grok was meticulously evaluated against project requirements and Open-Meteo’s API specifications. Suggestions were carefully revised and improved before implementation by cross-referencing with documentation to verify correct endpoints (/search, /forecast) and parameters (e.g., forecast_days). 
-- Iterative Refinement: Grok’s suggestions underwent an iterative process of review, improvement, and validation. Outputs were scrutinized, and enhancements were made before implementation—such as refining test configurations to address cache initialization failures by incorporating Jest fake timers and detailed mock setups. 
+- Accessing the Open-Meteo API: I directed Grok to review the Open-Meteo API documentation and propose an initial plan for integration. Its suggestions covered aspects such as request structuring and retry logic for transient errors (e.g., HTTP 429, network issues). These were reviewed for accuracy, cross-referenced with documentation, and adjusted as needed before implementation.
 
+- Implementation Roadmap: The project followed a modular architecture—separating presentation, business logic, and data access layers. I guided Grok to outline steps such as defining the GraphQL schema with TypeScript codegen and implementing heuristic-based activity ranking. I refined this plan and applied it in developing key modules, including resolvers.ts, activityRanking.ts, and the testing framework.
+
+- Evaluation and Validation: Each AI-generated suggestion was assessed against project requirements and the Open-Meteo API specifications. Endpoints (e.g., /search, /forecast) and parameters (e.g., forecast_days) were confirmed before integration.
+
+- Iterative Refinement: Outputs went through multiple review cycles, with targeted improvements made before implementation. For example, testing configurations were refined to address cache initialization issues by introducing Jest fake timers and detailed mock setups to ensure reliability.
 
 ## Query Examples
 Below are sample GraphQL queries for the implemented features, using the schema defined in src/schema/types.ts.
