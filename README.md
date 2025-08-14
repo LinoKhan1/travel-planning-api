@@ -23,7 +23,7 @@ Setup Instructions
 
 ### Clone the Repository:
 ``` sh
-git clone https://github.com/<your-username>/travel-planning-api.git
+git clone [https://github.com/<your-username>/travel-planning-api.git](https://github.com/LinoKhan1/travel-planning-api.git)
 cd travel-planning-api
 ```
 ### Install Dependencies:
