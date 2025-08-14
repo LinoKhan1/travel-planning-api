@@ -19,7 +19,8 @@ This project implements a GraphQL API for a travel planning application, support
 - Activity Ranking: Ranks activities (outdoor sightseeing, indoor sightseeing, skiing, surfing) based on weather conditions, using a heuristic-based algorithm.
 
 The API is built with scalability, maintainability, and testability in mind, leveraging TypeScript for type safety (with codegen for schema types), Apollo Server for GraphQL, and Jest/Supertest for comprehensive unit and integration testing. The codebase adheres to best practices, with modular architecture, robust error handling, and in-memory caching to optimize API calls.
-Setup Instructions
+
+## Setup Instructions
 
 ### Clone the Repository:
 ``` sh
