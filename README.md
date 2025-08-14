@@ -83,10 +83,14 @@ utils/activityRanking.ts: Implements heuristic-based ranking of activities based
 OpenMeteoDataSource.ts: Encapsulates Open-Meteo API calls for geocoding and weather forecasts, using Axios with retry logic (axios-retry) and in-memory caching (lru-cache).
 
 ## Testing Layer (tests/):
-- **tests/unit/: Tests individual components:**
-- **activityRanking.test.ts: 7 tests for ranking logic (all passing).**
-- **OpenMeteoDataSource.test.ts: 9 tests for API calls and caching (fixed undefined cache issue).**
-- **resolvers.test.ts: 12 tests for GraphQL resolvers.**
+
+### tests/unit/: Tests individual components:
+
+- activityRanking.test.ts: 7 tests for ranking logic (all passing).
+- OpenMeteoDataSource.test.ts: 9 tests for API calls and caching (fixed undefined cache issue).
+- resolvers.test.ts: Omitted due to time constraints and other commitments, as GraphQL resolvers were tested directly in Apollo Server.
+
+### tests/integration/: No integration tests were conducted due to time constraints and other commitments.
 
 ## Configuration:
 -**.env: Stores API URLs**
