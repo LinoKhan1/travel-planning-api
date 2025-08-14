@@ -1,8 +1,8 @@
 # Travel Planning API
 A GraphQL API for a travel planning application, providing dynamic city suggestions, weather forecasts, and activity rankings based on weather conditions. Built with Node.js, TypeScript, and Apollo Server, integrating with the Open-Meteo API for geocoding and weather data.
-Table of Contents
 
-# Overview
+# Table of Contents
+- **Overview**
 - **Setup Instructions**
 - **Project Architecture**
 - **Technical Choices**
