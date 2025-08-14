@@ -73,15 +73,15 @@ npm run format
 The project follows a modular, layered architecture to ensure separation of concerns, scalability, and testability:
 
 ## Presentation Layer (src/index.ts, src/schema/):
-index.ts: Initializes Apollo Server, integrating schema, resolvers, and data sources.
-schema/types.ts: Defines GraphQL schema (SDL) and generated TypeScript types for City, WeatherForecast, and Activity using codegen.
+- index.ts: Initializes Apollo Server, integrating schema, resolvers, and data sources.
+- schema/types.ts: Defines GraphQL schema (SDL) and generated TypeScript types for City, WeatherForecast, and Activity using codegen.
 
 ## Business Logic Layer (src/resolvers/, src/utils/):
-resolvers.ts: Orchestrates data fetching for citySuggestions, weatherForecast, and activityRanking queries, with complexity checks.
-utils/activityRanking.ts: Implements heuristic-based ranking of activities based on weather conditions.
+- resolvers.ts: Orchestrates data fetching for citySuggestions, weatherForecast, and activityRanking queries, with complexity checks.
+- utils/activityRanking.ts: Implements heuristic-based ranking of activities based on weather conditions.
 
 ## Data Access Layer (src/datasources/):
-OpenMeteoDataSource.ts: Encapsulates Open-Meteo API calls for geocoding and weather forecasts, using Axios with retry logic (axios-retry) and in-memory caching (lru-cache).
+- OpenMeteoDataSource.ts: Encapsulates Open-Meteo API calls for geocoding and weather forecasts, using Axios with retry logic (axios-retry) and in-memory caching (lru-cache).
 
 ## Testing Layer (tests/):
 
