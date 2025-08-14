@@ -1,8 +1,8 @@
-### Travel Planning API
+# Travel Planning API
 A GraphQL API for a travel planning application, providing dynamic city suggestions, weather forecasts, and activity rankings based on weather conditions. Built with Node.js, TypeScript, and Apollo Server, integrating with the Open-Meteo API for geocoding and weather data.
 Table of Contents
 
-## Overview
+# Overview
 - **Setup Instructions**
 - **Project Architecture**
 - **Technical Choices**
@@ -20,12 +20,12 @@ Activity Ranking: Ranks activities (outdoor sightseeing, indoor sightseeing, ski
 The API is built with scalability, maintainability, and testability in mind, leveraging TypeScript for type safety (with codegen for schema types), Apollo Server for GraphQL, and Jest/Supertest for comprehensive unit and integration testing. The codebase adheres to best practices, with modular architecture, robust error handling, and in-memory caching to optimize API calls.
 Setup Instructions
 
-# Clone the Repository:
+### Clone the Repository:
 ``` sh
 git clone https://github.com/<your-username>/travel-planning-api.git
 cd travel-planning-api
 ```
-# Install Dependencies:
+### Install Dependencies:
 ``` sh
 npm install
 ```
@@ -42,7 +42,7 @@ Ensure the following key dependencies are installed:
 - **jest@29.5.0, ts-jest@29.1.0, @types/jest@29.5.0 (dev)**
 
 
-#### Configure Environment Variables:Create a .env file in the root directory:
+### Configure Environment Variables:Create a .env file in the root directory:
 ```sh
 OPEN_METEO_GEOCODING_URL=https://geocoding-api.open-meteo.com/v1
 OPEN_METEO_FORECAST_URL=https://api.open-meteo.com/v1
@@ -55,7 +55,7 @@ npm start
 
 Access the GraphQL Playground at http://localhost:4000.
 
-#### Run Tests:
+### Run Tests:
 
 Unit tests (28 total: 7 for activityRanking, 9 for OpenMeteoDataSource, 12 for resolvers):npm test
 
@@ -70,24 +70,24 @@ npm run format
 ## Project Architecture
 The project follows a modular, layered architecture to ensure separation of concerns, scalability, and testability:
 
-### Presentation Layer (src/index.ts, src/schema/):
+## Presentation Layer (src/index.ts, src/schema/):
 index.ts: Initializes Apollo Server, integrating schema, resolvers, and data sources.
 schema/types.ts: Defines GraphQL schema (SDL) and generated TypeScript types for City, WeatherForecast, and Activity using codegen.
 
-### Business Logic Layer (src/resolvers/, src/utils/):
+## Business Logic Layer (src/resolvers/, src/utils/):
 resolvers.ts: Orchestrates data fetching for citySuggestions, weatherForecast, and activityRanking queries, with complexity checks.
 utils/activityRanking.ts: Implements heuristic-based ranking of activities based on weather conditions.
 
-### Data Access Layer (src/datasources/):
+## Data Access Layer (src/datasources/):
 OpenMeteoDataSource.ts: Encapsulates Open-Meteo API calls for geocoding and weather forecasts, using Axios with retry logic (axios-retry) and in-memory caching (lru-cache).
 
-### Testing Layer (tests/):
-tests/unit/: Tests individual components:
-activityRanking.test.ts: 7 tests for ranking logic (all passing).
-OpenMeteoDataSource.test.ts: 9 tests for API calls and caching (fixed undefined cache issue).
-resolvers.test.ts: 12 tests for GraphQL resolvers.
+## Testing Layer (tests/):
+- **tests/unit/: Tests individual components:**
+- **activityRanking.test.ts: 7 tests for ranking logic (all passing).**
+- **OpenMeteoDataSource.test.ts: 9 tests for API calls and caching (fixed undefined cache issue).**
+- **resolvers.test.ts: 12 tests for GraphQL resolvers.**
 
-### Configuration:
+## Configuration:
 -**.env: Stores API URLs**
 - **tsconfig.json: Configures TypeScript with strict mode.**
 - **.eslintrc.js, .prettierrc: Enforce code quality and formatting.**
@@ -97,19 +97,19 @@ This structure supports extensibility, simplifies debugging, and ensures robust 
 
 ## Technical Choices
 
-Node.js: Stable runtime for backend development.
-TypeScript: Ensures type safety with codegen for GraphQL schema types.
-Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.
-GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.
-Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).
-Dotenv: Manages environment variables (dotenv@17.2.1).
-Winston: Structured logging for debugging and monitoring.
-lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.
-Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.
-Nock: Mocks Open-Meteo API calls for reliable, offline tests.
-ESLint/Prettier: Enforce TypeScript best practices and formatting.
-ts-node: Runs TypeScript during development.
-Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.
+- **Node.js: Stable runtime for backend development.** 
+-**TypeScript: Ensures type safety with codegen for GraphQL schema types.**
+-**Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.**
+-**GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.**
+-**Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).**
+-**Dotenv: Manages environment variables (dotenv@17.2.1).**
+-**Winston: Structured logging for debugging and monitoring.**
+-**lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.**
+-**Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.**
+-**Nock: Mocks Open-Meteo API calls for reliable, offline tests.**
+-**ESLint/Prettier: Enforce TypeScript best practices and formatting.**
+-**ts-node: Runs TypeScript during development.**
+-**Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.**
 
 These choices prioritize performance, developer experience, and alignment with the project’s requirements.
 
