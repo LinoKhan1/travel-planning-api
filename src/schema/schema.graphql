@@ -1,35 +1,53 @@
+# Defining the City type for representing geographical locations
+# Contains essential metadata about cities retrieved from the Open-Meteo geocoding API
 type City {
-  id: ID!
-  name: String!
-  latitude: Float!
-  longitude: Float!
-  country: String
-  population: Int
+  id: ID!         # Unique identifier for the city (non-nullable)
+  name: String!   # Name of the city (non-nullable)
+  latitude: Float! # Latitude coordinate of the city (non-nullable)
+  longitude: Float! # Longitude coordinate of the city (non-nullable)
+  country: String  # Country where the city is located (nullable)
+  population: Int  # Population of the city (nullable)
 }
 
+# Defining the WeatherForecast type for daily weather data
+# Represents weather conditions for a specific date at a given location
 type WeatherForecast {
-  date: String!
-  temperatureMax: Float!
-  temperatureMin: Float!
-  precipitationSum: Float!
-  windSpeedMax: Float!
+  date: String!           # Date of the forecast in YYYY-MM-DD format (non-nullable)
+  temperatureMax: Float!  # Maximum temperature in Celsius (non-nullable)
+  temperatureMin: Float!  # Minimum temperature in Celsius (non-nullable)
+  precipitationSum: Float! # Total precipitation in millimeters (non-nullable)
+  windSpeedMax: Float!    # Maximum wind speed in kilometers per hour (non-nullable)
 }
 
+# Defining the Activity type for ranked activity recommendations
+# Represents an activity with its type, rank, and suitability based on weather conditions
 type Activity {
-  type: ActivityType!
-  rank: Int!
-  suitabilityScore: Float!
+  type: ActivityType!     # Type of activity from the ActivityType enum (non-nullable)
+  rank: Int!              # Rank of the activity (1 to 4, non-nullable)
+  suitabilityScore: Float! # Suitability score for the activity (0 to 1, non-nullable)
 }
 
+# Defining the ActivityType enum for categorizing activities
+# Lists possible activity types for ranking based on weather suitability
 enum ActivityType {
-  SKIING
-  SURFING
-  INDOOR_SIGHTSEEING
-  OUTDOOR_SIGHTSEEING
+  SKIING              # Skiing activity, suitable for cold and snowy conditions
+  SURFING             # Surfing activity, suitable for warm and windy coastal conditions
+  INDOOR_SIGHTSEEING  # Indoor sightseeing, suitable for rainy or extreme weather
+  OUTDOOR_SIGHTSEEING # Outdoor sightseeing, suitable for mild and dry weather
 }
 
+# Defining the Query type for available API operations
+# Specifies the entry points for fetching data via GraphQL
 type Query {
+  # Retrieving a list of cities matching a search query
+  # Supports pagination with limit and offset parameters
   citySuggestions(query: String!, limit: Int = 10, offset: Int = 0): [City!]!
+
+  # Fetching weather forecasts for a specific location
+  # Returns daily forecasts for the specified number of days
   weatherForecast(cityLatitude: Float!, cityLongitude: Float!, forecastDays: Int = 7): [WeatherForecast!]!
+
+  # Generating ranked activity recommendations based on weather
+  # Returns activities sorted by suitability for the given location and forecast period
   activityRanking(cityLatitude: Float!, cityLongitude: Float!, forecastDays: Int = 7): [Activity!]!
 }
