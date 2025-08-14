@@ -51,7 +51,7 @@ OPEN_METEO_FORECAST_URL=https://api.open-meteo.com/v1
 ### Run the Server:
 ```sh
 npm start
-```sh
+```
 
 Access the GraphQL Playground at http://localhost:4000.
 
@@ -65,7 +65,7 @@ Debug open handles:npm test -- --detectOpenHandles
 ```sh
 npm run lint
 npm run format
-```sh
+```
 
 ## Project Architecture
 The project follows a modular, layered architecture to ensure separation of concerns, scalability, and testability:
