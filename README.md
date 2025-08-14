@@ -8,6 +8,7 @@ Table of Contents
 - **Technical Choices**
 - **Omissions and Trade-offs**
 - **Potential Improvements**
+- **Use of AI**
 - **Query Examples**
 
 ## Overview
@@ -130,6 +131,15 @@ These choices prioritize performance, developer experience, and alignment with t
 - **Monitoring: Integrate Prometheus for metrics and advanced logging.**
 - **Integration Tests: Expand tests/integration/ with more end-to-end scenarios.**
 - **Schema Extensions: Add types/queries for hotel recommendations or travel itineraries.**
+
+## Use of AI
+I guided the AI in terms of directions to follow, ensuring alignment with project requirements and best practices. Grok, an AI assistant developed by xAI, was instrumental in the development of this project, particularly in the following areas:
+
+- Accessing the Open-Meteo API: I asked Grok to access the Open Meteo API, and based on the documentation to provide a roadmap. Grok offered guidance on integrating with Open-Meteo’s geocoding and forecast APIs, including structuring HTTP requests and implementing retry logic for transient errors (e.g., 429, network issues).
+- Implementation Roadmap: Based on my request for Grok to access the Open Meteo API and provide a roadmap grounded in the documentation, Grok proposed a structured plan for implementation. This included prioritizing a modular architecture (presentation, business logic, data access layers), defining the GraphQL schema with TypeScript codegen, and implementing heuristic-based activity ranking. The roadmap guided the development of resolvers.ts, activityRanking.ts, and the testing strategy.
+- Evaluation and Validation: Each output from Grok was meticulously evaluated against project requirements and Open-Meteo’s API specifications. Suggestions were carefully revised and improved before implementation by cross-referencing with documentation to verify correct endpoints (/search, /forecast) and parameters (e.g., forecast_days). 
+- Iterative Refinement: Grok’s suggestions underwent an iterative process of review, improvement, and validation. Outputs were scrutinized, and enhancements were made before implementation—such as refining test configurations to address cache initialization failures by incorporating Jest fake timers and detailed mock setups. 
+
 
 ## Query Examples
 Below are sample GraphQL queries for the implemented features, using the schema defined in src/schema/types.ts.
