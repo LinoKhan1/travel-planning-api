@@ -89,7 +89,7 @@ The project follows a modular, layered architecture to ensure separation of conc
 
 - activityRanking.test.ts: 7 tests for ranking logic (all passing).
 - OpenMeteoDataSource.test.ts: 10 tests for API calls and caching (all passing).
-- resolvers.test.ts: Omitted due to time constraints and other commitments, as GraphQL resolvers were tested directly in Apollo Server.
+- resolvers.test.ts: 16 tests for resolvers weather forecasts & activity rankimg (all passing).
 
 ### tests/integration/: No integration tests were conducted due to time constraints and other commitments.
 
