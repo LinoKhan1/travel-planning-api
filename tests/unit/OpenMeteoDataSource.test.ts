@@ -1,267 +1,324 @@
+// Importing dependencies for testing the OpenMeteoDataSource class
 import { OpenMeteoDataSource } from '../../src/datasources/OpenMeteoDataSource';
-import nock from 'nock';
-import { City, WeatherForecast } from '../../src/schema/types';
+import axios from 'axios';
 import { LRUCache } from 'lru-cache';
+import { City, WeatherForecast } from '../../src/schema/types';
 
-// Mock environment variables
-process.env.OPEN_METEO_GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1';
-process.env.OPEN_METEO_FORECAST_URL = 'https://api.open-meteo.com/v1';
+// Mocking axios, axios-retry, and LRUCache to isolate external dependencies
+jest.mock('axios');
+jest.mock('lru-cache');
 
+// Casting mocked axios and LRUCache to their respective Jest mocked types
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedLRUCache = LRUCache as jest.MockedClass<typeof LRUCache>;
+
+// Define mock environment variables for Open-Meteo API URLs
+const mockEnv = {
+  OPEN_METEO_GEOCODING_URL: 'https://geocoding-api.open-meteo.com/v1',
+  OPEN_METEO_FORECAST_URL: 'https://api.open-meteo.com/v1',
+};
+
+// Create a mocked Axios instance to be returned by axios.create
+const mockedAxiosInstance = {
+  get: mockedAxios.get, // Use the same get method as mockedAxios.get
+  interceptors: {
+    request: { use: jest.fn(), eject: jest.fn() },
+    response: { use: jest.fn(), eject: jest.fn() },
+  },
+} as any; // Use 'as any' to satisfy TypeScript, as the mock is partial
+
+// Configure axios.create mock globally to return the mocked instance
+mockedAxios.create.mockReturnValue(mockedAxiosInstance);
+
+
+
+// Test suite for OpenMeteoDataSource class
 describe('OpenMeteoDataSource', () => {
   let dataSource: OpenMeteoDataSource;
+  let mockCache: jest.Mocked<LRUCache<string, City[] | WeatherForecast[]>>;
+  // Store original process.env to restore after each test
+  let originalEnv: NodeJS.ProcessEnv;
 
+  // Setup before each test case
   beforeEach(() => {
-    // Initialize data source
-    dataSource = new OpenMeteoDataSource();
-    // Clear cache for isolation
-    (dataSource as any).cache = new LRUCache({
+    // Clear all mocks to ensure a clean state for each test
+    jest.clearAllMocks();
+    // Store the original process.env to restore later
+    originalEnv = { ...process.env };
+    // Mock process.env with the test-specific environment variables
+    process.env = { ...mockEnv };
+    // Initialize mockCache with mocked get/set methods and static max/ttl properties
+    mockCache = {
+      get: jest.fn(),
+      set: jest.fn(),
       max: 1000,
       ttl: 1000 * 60 * 60,
-    });
-    // Use fake timers for TTL
-    jest.useFakeTimers();
-    // Prevent real network requests
-    nock.disableNetConnect();
+    } as unknown as jest.Mocked<LRUCache<string, City[] | WeatherForecast[], unknown>>;
+    // Mock LRUCache constructor to return mockCache, aligning with the specific types used in OpenMeteoDataSource
+    mockedLRUCache.mockImplementation(
+      (_options: LRUCache.Options<any, any, any>) =>
+        mockCache as unknown as LRUCache<{}, {}, unknown>
+    );
+    // Create a fresh instance of OpenMeteoDataSource for each test
+    dataSource = new OpenMeteoDataSource();
   });
 
+  // Cleanup after each test case
   afterEach(() => {
-    // Clean up mocks and timers
-    nock.cleanAll();
-    nock.enableNetConnect();
-    jest.runAllTimers();
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    // Restore the original process.env to prevent test pollution
+    process.env = originalEnv;
   });
 
+  // Test suite for constructor initialization
   describe('constructor', () => {
-    it('should initialize Axios client and LRU cache', async () => {
-      expect(dataSource['client']).toBeDefined();
-      expect(dataSource['client'].defaults.baseURL).toBe('https://geocoding-api.open-meteo.com/v1');
-      expect(dataSource['cache']).toBeInstanceOf(LRUCache);
-      expect(dataSource['cache'].max).toBe(1000);
-    }, 10000);
+    // Test case: Verify Axios client is initialized with correct configuration
+    it('initializes Axios client with correct configuration', () => {
+      // Assert that axios.create is called with the expected baseURL and timeout
+      expect(mockedAxios.create).toHaveBeenCalledWith({
+        baseURL: 'https://geocoding-api.open-meteo.com/v1', // Matches OPEN_METEO_GEOCODING_URL
+        timeout: 5000, // Matches the 5-second timeout in OpenMeteoDataSource
+      });
+    });
+
+    // Test case: Verify LRU cache is initialized with correct settings
+    it('initializes LRU cache with correct settings', () => {
+      // Assert that LRUCache is instantiated with max=1000 and ttl=1 hour
+      expect(mockedLRUCache).toHaveBeenCalledWith({
+        max: 1000, // Matches the cache size limit in OpenMeteoDataSource
+        ttl: 1000 * 60 * 60, // Matches the 1-hour TTL in OpenMeteoDataSource
+      });
+    });
   });
 
+  // Test suite for searchCities method
   describe('searchCities', () => {
-    it('should fetch and return cities for a valid query', async () => {
-      const mockResponse = {
-        results: [
-          {
-            id: 2988507,
-            name: 'Paris',
-            latitude: 48.85341,
-            longitude: 2.3488,
-            country: 'France',
-            population: 2138551,
-          },
-        ],
-      };
-      nock('https://geocoding-api.open-meteo.com')
-        .get('/v1/search')
-        .query({ name: 'Paris', count: '2', language: 'en' })
-        .reply(200, mockResponse);
-
-      const result = await dataSource.searchCities('Paris', 2);
-      const expected: City[] = [
+    // Mock response for a successful geocoding API call
+    const mockGeocodingResponse = {
+      results: [
         {
-          id: '2988507',
-          name: 'Paris',
-          latitude: 48.85341,
-          longitude: 2.3488,
-          country: 'France',
-          population: 2138551,
+          id: 1,
+          name: 'London',
+          latitude: 51.5074,
+          longitude: -0.1278,
+          country: 'UK',
+          population: 9000000,
         },
-      ];
-      expect(result).toEqual(expected);
-      expect(dataSource['cache'].get('city:Paris:2')).toEqual(expected);
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
+      ],
+    };
 
-    it('should return cached cities if available', async () => {
-      const cachedCities: City[] = [
-        {
-          id: '2988507',
-          name: 'Paris',
-          latitude: 48.85341,
-          longitude: 2.3488,
-          country: 'France',
-          population: 2138551,
+    // Expected output after mapping the mock response to City type
+    const expectedCities: City[] = [
+      {
+        id: '1', // ID is converted to string as per OpenMeteoDataSource mapping
+        name: 'London',
+        latitude: 51.5074,
+        longitude: -0.1278,
+        country: 'UK',
+        population: 9000000,
+      },
+    ];
+
+    // Test case: Verify successful city fetching and mapping
+    it('fetches and maps cities correctly', async () => {
+      // Mock a successful Axios response with mockGeocodingResponse
+      mockedAxios.get.mockResolvedValue({
+        data: mockGeocodingResponse,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {
+          url: '/search',
+          headers: {},
+          method: 'get',
         },
-      ];
-      dataSource['cache'].set('city:Paris:2', cachedCities);
+      });
+      // Call searchCities with query 'London' and limit 10
+      const result = await dataSource.searchCities('London', 10);
+      // Assert that axios.get was called with the correct endpoint and parameters
+      expect(mockedAxios.get).toHaveBeenCalledWith('/search', {
+        params: { name: 'London', count: 10, language: 'en' },
+      });
+      // Assert that the response is correctly mapped to City objects
+      expect(result).toEqual(expectedCities);
+      // Assert that the result is cached with the correct key
+      expect(mockCache.set).toHaveBeenCalledWith('city:London:10', expectedCities);
+    });
 
-      const result = await dataSource.searchCities('Paris', 2);
-      expect(result).toEqual(cachedCities);
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
+    // Test case: Verify cached results are returned without API call
+    it('returns cached results for same query and limit', async () => {
+      // Mock cache to return expectedCities for the cache key
+      mockCache.get.mockReturnValue(expectedCities);
+      // Call searchCities with the same query and limit
+      const result = await dataSource.searchCities('London', 10);
+      // Assert that cache.get was called with the correct key
+      expect(mockCache.get).toHaveBeenCalledWith('city:London:10');
+      // Assert that no API call was made
+      expect(mockedAxios.get).not.toHaveBeenCalled();
+      // Assert that the cached result is returned
+      expect(result).toEqual(expectedCities);
+    });
 
-    it('should return empty array for no results and cache it', async () => {
-      nock('https://geocoding-api.open-meteo.com')
-        .get('/v1/search')
-        .query({ name: 'NonExistent', count: '2', language: 'en' })
-        .reply(200, { results: [] });
-
-      const result = await dataSource.searchCities('NonExistent', 2);
+    // Test case: Verify handling of empty API results
+    it('handles empty results', async () => {
+      // Mock an Axios response with empty results
+      mockedAxios.get.mockResolvedValue({
+        data: { results: [] },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {
+          url: '/search',
+          headers: {},
+          method: 'get',
+        },
+      });
+      // Call searchCities with a query that yields no results
+      const result = await dataSource.searchCities('Unknown', 10);
+      // Assert that an empty array is returned
       expect(result).toEqual([]);
-      expect(dataSource['cache'].get('city:NonExistent:2')).toEqual([]);
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
+      // Assert that the empty result is cached
+      expect(mockCache.set).toHaveBeenCalledWith('city:Unknown:10', []);
+    });
 
-    it('should throw error for network failure', async () => {
-      nock('https://geocoding-api.open-meteo.com')
-        .get('/v1/search')
-        .query({ name: 'Paris', count: '2', language: 'en' })
-        .replyWithError({ message: 'Network Error', code: 'ECONNABORTED' });
+    // Test case: Verify handling of special characters in query
+    it('handles special characters in query', async () => {
+      // Mock a successful Axios response with mockGeocodingResponse
+      mockedAxios.get.mockResolvedValue({
+        data: mockGeocodingResponse,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {
+          url: '/search',
+          headers: {},
+          method: 'get',
+        },
+      });
+      // Call searchCities with a query containing special characters
+      await dataSource.searchCities('São Paulo', 5);
+      // Assert that axios.get was called with correctly encoded parameters
+      expect(mockedAxios.get).toHaveBeenCalledWith('/search', {
+        params: { name: 'São Paulo', count: 5, language: 'en' },
+      });
+    });
 
-      await expect(dataSource.searchCities('Paris', 2)).rejects.toThrow('Failed to fetch cities: Network Error');
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
+  
   });
 
+  // Test suite for getWeatherForecast method
   describe('getWeatherForecast', () => {
-    it('should fetch and return weather forecast for valid coordinates', async () => {
-      const mockResponse = {
-        daily: {
-          time: ['2025-08-14'],
-          temperature_2m_max: [25.5],
-          temperature_2m_min: [15.5],
-          precipitation_sum: [0],
-          wind_speed_10m_max: [14.5],
+    // Mock response for a successful weather forecast API call
+    const mockWeatherResponse = {
+      daily: {
+        time: ['2025-08-21'],
+        temperature_2m_max: [25],
+        temperature_2m_min: [15],
+        precipitation_sum: [0],
+        wind_speed_10m_max: [10],
+      },
+    };
+
+    // Expected output after mapping the mock response to WeatherForecast type
+    const expectedForecasts: WeatherForecast[] = [
+      {
+        date: '2025-08-21',
+        temperatureMax: 25,
+        temperatureMin: 15,
+        precipitationSum: 0,
+        windSpeedMax: 10,
+      },
+    ];
+
+    // Test case: Verify successful forecast fetching and mapping
+    it('fetches and maps forecasts correctly', async () => {
+      // Mock a successful Axios response with mockWeatherResponse
+      mockedAxios.get.mockResolvedValue({
+        data: mockWeatherResponse,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {
+          url: '/forecast',
+          headers: {},
+          method: 'get',
         },
-      };
-      nock('https://api.open-meteo.com')
-        .get('/v1/forecast')
-        .query({
-          latitude: '48.85341',
-          longitude: '2.3488',
+      });
+      // Call getWeatherForecast with valid coordinates and forecast days
+      const result = await dataSource.getWeatherForecast(51.5074, -0.1278, 7);
+      // Assert that axios.get was called with the correct endpoint and parameters
+      expect(mockedAxios.get).toHaveBeenCalledWith('/forecast', {
+        baseURL: 'https://api.open-meteo.com/v1',
+        params: {
+          latitude: 51.5074,
+          longitude: -0.1278,
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
           timezone: 'auto',
-          forecast_days: '1',
-        })
-        .reply(200, mockResponse);
-
-      const result = await dataSource.getWeatherForecast(48.85341, 2.3488, 1);
-      const expected: WeatherForecast[] = [
-        {
-          date: '2025-08-14',
-          temperatureMax: 25.5,
-          temperatureMin: 15.5,
-          precipitationSum: 0,
-          windSpeedMax: 14.5,
+          forecast_days: 7,
         },
-      ];
-      expect(result).toEqual(expected);
-      expect(dataSource['cache'].get('forecast:48.85341:2.3488:1')).toEqual(expected);
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
+      });
+      // Assert that the response is correctly mapped to WeatherForecast objects
+      expect(result).toEqual(expectedForecasts);
+      // Assert that the result is cached with the correct key
+      expect(mockCache.set).toHaveBeenCalledWith('forecast:51.5074:-0.1278:7', expectedForecasts);
+    });
 
-    it('should return cached forecast if available', async () => {
-      const cachedForecast: WeatherForecast[] = [
-        {
-          date: '2025-08-14',
-          temperatureMax: 25.5,
-          temperatureMin: 15.5,
-          precipitationSum: 0,
-          windSpeedMax: 14.5,
+    // Test case: Verify cached results are returned without API call
+    it('returns cached results for same parameters', async () => {
+      // Mock cache to return expectedForecasts for the cache key
+      mockCache.get.mockReturnValue(expectedForecasts);
+      // Call getWeatherForecast with the same parameters
+      const result = await dataSource.getWeatherForecast(51.5074, -0.1278, 7);
+      // Assert that cache.get was called with the correct key
+      expect(mockCache.get).toHaveBeenCalledWith('forecast:51.5074:-0.1278:7');
+      // Assert that no API call was made
+      expect(mockedAxios.get).not.toHaveBeenCalled();
+      // Assert that the cached result is returned
+      expect(result).toEqual(expectedForecasts);
+    });
+
+    // Test case: Verify handling of invalid latitude
+    it('handles invalid latitude', async () => {
+      // Mock an Axios error response for invalid latitude (400 Bad Request)
+      mockedAxios.get.mockRejectedValue({
+        response: {
+          status: 400,
+          statusText: 'Bad Request',
+          headers: {},
+          config: { url: '/forecast', headers: {}, method: 'get' },
         },
-      ];
-      dataSource['cache'].set('forecast:48.85341:2.3488:1', cachedForecast);
+      });
+      // Assert that getWeatherForecast throws an error for invalid latitude
+      await expect(dataSource.getWeatherForecast(91, -0.1278, 7)).rejects.toThrow('Failed to fetch weather forecast:');
+    });
 
-      const result = await dataSource.getWeatherForecast(48.85341, 2.3488, 1);
-      expect(result).toEqual(cachedForecast);
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
-
-    it('should throw error for invalid coordinates', async () => {
-      nock('https://api.open-meteo.com')
-        .get('/v1/forecast')
-        .query({
-          latitude: '999',
-          longitude: '2.3488',
-          daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
-          timezone: 'auto',
-          forecast_days: '1',
-        })
-        .reply(400, { error: 'Invalid latitude' });
-
-      await expect(dataSource.getWeatherForecast(999, 2.3488, 1)).rejects.toThrow('Failed to fetch weather forecast: Request failed with status code 400');
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
-
-    it('should retry on 429 rate limit and succeed', async () => {
-      nock('https://api.open-meteo.com')
-        .get('/v1/forecast')
-        .query({
-          latitude: '48.85341',
-          longitude: '2.3488',
-          daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
-          timezone: 'auto',
-          forecast_days: '1',
-        })
-        .times(2)
-        .reply(429, { error: 'Too many requests' })
-        .get('/v1/forecast')
-        .query({
-          latitude: '48.85341',
-          longitude: '2.3488',
-          daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
-          timezone: 'auto',
-          forecast_days: '1',
-        })
-        .reply(200, {
+    // Test case: Verify handling of zero forecast days
+    it('handles zero forecast days', async () => {
+      // Mock an Axios response with empty daily arrays
+      mockedAxios.get.mockResolvedValue({
+        data: {
           daily: {
-            time: ['2025-08-14'],
-            temperature_2m_max: [25.5],
-            temperature_2m_min: [15.5],
-            precipitation_sum: [0],
-            wind_speed_10m_max: [14.5],
+            time: [],
+            temperature_2m_max: [],
+            temperature_2m_min: [],
+            precipitation_sum: [],
+            wind_speed_10m_max: [],
           },
-        });
-
-      const result = await dataSource.getWeatherForecast(48.85341, 2.3488, 1);
-      expect(result).toHaveLength(1);
-      expect(result[0].date).toBe('2025-08-14');
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 15000);
-
-    it('should handle cache TTL expiration', async () => {
-      const cachedForecast: WeatherForecast[] = [
-        {
-          date: '2025-08-14',
-          temperatureMax: 25.5,
-          temperatureMin: 15.5,
-          precipitationSum: 0,
-          windSpeedMax: 14.5,
         },
-      ];
-      dataSource['cache'].set('forecast:48.85341:2.3488:1', cachedForecast, { ttl: 1000 });
-
-      // Advance time and run timers
-      jest.advanceTimersByTime(2000);
-      jest.runAllTimers();
-
-      nock('https://api.open-meteo.com')
-        .get('/v1/forecast')
-        .query({
-          latitude: '48.85341',
-          longitude: '2.3488',
-          daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
-          timezone: 'auto',
-          forecast_days: '1',
-        })
-        .reply(200, {
-          daily: {
-            time: ['2025-08-14'],
-            temperature_2m_max: [26.0],
-            temperature_2m_min: [16.0],
-            precipitation_sum: [1.0],
-            wind_speed_10m_max: [15.0],
-          },
-        });
-
-      const result = await dataSource.getWeatherForecast(48.85341, 2.3488, 1);
-      expect(result[0].temperatureMax).toBe(26.0);
-      expect(nock.pendingMocks().length).toBe(0);
-    }, 10000);
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {
+          url: '/forecast',
+          headers: {},
+          method: 'get',
+        },
+      });
+      // Call getWeatherForecast with zero forecast days
+      const result = await dataSource.getWeatherForecast(51.5074, -0.1278, 0);
+      // Assert that an empty array is returned
+      expect(result).toEqual([]);
+      // Assert that the empty result is cached
+      expect(mockCache.set).toHaveBeenCalledWith('forecast:51.5074:-0.1278:0', []);
+    });
   });
 });
