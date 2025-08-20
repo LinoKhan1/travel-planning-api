@@ -1,8 +1,8 @@
 # Travel Planning API
 A GraphQL API for a travel planning application, providing dynamic city suggestions, weather forecasts, and activity rankings based on weather conditions. Built with Node.js, TypeScript, and Apollo Server, integrating with the Open-Meteo API for geocoding and weather data.
-Table of Contents
 
-# Overview
+# Table of Contents
+- **Overview**
 - **Setup Instructions**
 - **Project Architecture**
 - **Technical Choices**
@@ -14,16 +14,17 @@ Table of Contents
 ## Overview
 This project implements a GraphQL API for a travel planning application, supporting three core features:
 
-Dynamic City Suggestions: Returns city matches based on partial or complete user input using Open-Meteo’s geocoding API, with results cached for performance.
-Weather Forecasts: Provides daily weather forecasts (temperature, precipitation, wind speed) for a selected city via Open-Meteo’s forecast API, with retry logic for reliability.
-Activity Ranking: Ranks activities (outdoor sightseeing, indoor sightseeing, skiing, surfing) based on weather conditions, using a heuristic-based algorithm.
+- Dynamic City Suggestions: Returns city matches based on partial or complete user input using Open-Meteo’s geocoding API, with results cached for performance.
+- Weather Forecasts: Provides daily weather forecasts (temperature, precipitation, wind speed) for a selected city via Open-Meteo’s forecast API, with retry logic for reliability.
+- Activity Ranking: Ranks activities (outdoor sightseeing, indoor sightseeing, skiing, surfing) based on weather conditions, using a heuristic-based algorithm.
 
 The API is built with scalability, maintainability, and testability in mind, leveraging TypeScript for type safety (with codegen for schema types), Apollo Server for GraphQL, and Jest/Supertest for comprehensive unit and integration testing. The codebase adheres to best practices, with modular architecture, robust error handling, and in-memory caching to optimize API calls.
-Setup Instructions
+
+## Setup Instructions
 
 ### Clone the Repository:
 ``` sh
-git clone https://github.com/<your-username>/travel-planning-api.git
+git clone [https://github.com/<your-username>/travel-planning-api.git](https://github.com/LinoKhan1/travel-planning-api.git)
 cd travel-planning-api
 ```
 ### Install Dependencies:
@@ -72,15 +73,15 @@ npm run format
 The project follows a modular, layered architecture to ensure separation of concerns, scalability, and testability:
 
 ## Presentation Layer (src/index.ts, src/schema/):
-index.ts: Initializes Apollo Server, integrating schema, resolvers, and data sources.
-schema/types.ts: Defines GraphQL schema (SDL) and generated TypeScript types for City, WeatherForecast, and Activity using codegen.
+- index.ts: Initializes Apollo Server, integrating schema, resolvers, and data sources.
+- schema/types.ts: Defines GraphQL schema (SDL) and generated TypeScript types for City, WeatherForecast, and Activity using codegen.
 
 ## Business Logic Layer (src/resolvers/, src/utils/):
-resolvers.ts: Orchestrates data fetching for citySuggestions, weatherForecast, and activityRanking queries, with complexity checks.
-utils/activityRanking.ts: Implements heuristic-based ranking of activities based on weather conditions.
+- resolvers.ts: Orchestrates data fetching for citySuggestions, weatherForecast, and activityRanking queries, with complexity checks.
+- utils/activityRanking.ts: Implements heuristic-based ranking of activities based on weather conditions.
 
 ## Data Access Layer (src/datasources/):
-OpenMeteoDataSource.ts: Encapsulates Open-Meteo API calls for geocoding and weather forecasts, using Axios with retry logic (axios-retry) and in-memory caching (lru-cache).
+- OpenMeteoDataSource.ts: Encapsulates Open-Meteo API calls for geocoding and weather forecasts, using Axios with retry logic (axios-retry) and in-memory caching (lru-cache).
 
 ## Testing Layer (tests/):
 
@@ -102,48 +103,50 @@ This structure supports extensibility, simplifies debugging, and ensures robust 
 
 ## Technical Choices
 
-- **Node.js: Stable runtime for backend development.** 
-- **TypeScript: Ensures type safety with codegen for GraphQL schema types.**
-- **Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.**
-- **GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.**
-- **Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).**
-- **Dotenv: Manages environment variables (dotenv@17.2.1).**
-- **Winston: Structured logging for debugging and monitoring.**
-- **lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.**
-- **Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.**
-- **Nock: Mocks Open-Meteo API calls for reliable, offline tests.**
-- **ESLint/Prettier: Enforce TypeScript best practices and formatting.**
-- **ts-node: Runs TypeScript during development.**
-- **Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.**
+- Node.js: Stable runtime for backend development.
+- TypeScript: Ensures type safety with codegen for GraphQL schema types.**
+- **Apollo Server: Robust GraphQL server with TypeScript support, plugins for complexity analysis, and GraphQL Playground.
+- GraphQL: Enables flexible, client-driven queries, reducing over/under-fetching.
+- Axios: Reliable HTTP client with axios-retry@3.3.0 for handling transient errors (e.g., 429, network issues).
+- **Dotenv: Manages environment variables (dotenv@17.2.1).
+- Winston: Structured logging for debugging and monitoring.**
+- lru-cache: In-memory caching (lru-cache@10.0.0) for API responses, reducing external calls.
+- Jest/Supertest: Industry-standard for unit (28 tests) and integration testing, with ts-jest for TypeScript.
+- Nock: Mocks Open-Meteo API calls for reliable, offline tests.
+- ESLint/Prettier: Enforce TypeScript best practices and formatting.
+- ts-node: Runs TypeScript during development.
+- Jest Fake Timers: Used in OpenMeteoDataSource.test.ts to test cache TTL without real setTimeout.
 
 These choices prioritize performance, developer experience, and alignment with the project’s requirements.
 
 ## Omissions and Trade-offs
 
-- **Omitted Redis: Used lru-cache for simplicity, as deployment isn’t required. Trade-off: Less suitable for distributed systems but sufficient for moderate load (1000 req/min).**
-- **Omitted Authentication: Not required by the assessment. Trade-off: Limits user-specific features but simplifies implementation.**
-- **Simplified Activity Ranking: Heuristic-based algorithm (temperature, precipitation, wind speed) instead of machine learning. Trade-off: Less precise but faster to implement.**
-- **Limited City Filters: Basic pagination (limit/offset) without advanced filters (e.g., by country). Trade-off: Reduced flexibility but meets core requirements.**
-- **Fixed Cache Issue: Resolved undefined cache error in OpenMeteoDataSource by mocking lru-cache and ensuring constructor initialization. Trade-off: Added test complexity but ensured reliability.**
-- **Worker Process Warning: Fixed by using Jest fake timers in OpenMeteoDataSource.test.ts. Trade-off: Simplified testing but requires careful timer management.**
+- Omitted Redis: Used lru-cache for simplicity, as deployment isn’t required. Trade-off: Less suitable for distributed systems but sufficient for moderate load (1000 req/min).
+- Omitted Authentication: Not required by the assessment. Trade-off: Limits user-specific features but simplifies implementation.
+- Simplified Activity Ranking: Heuristic-based algorithm (temperature, precipitation, wind speed) instead of machine learning. Trade-off: Less precise but faster to implement.
+- Limited City Filters: Basic pagination (limit/offset) without advanced filters (e.g., by country). Trade-off: Reduced flexibility but meets core requirements.
+- Fixed Cache Issue: Resolved undefined cache error in OpenMeteoDataSource by mocking lru-cache and ensuring constructor initialization. Trade-off: Added test complexity but ensured reliability.
+- Worker Process Warning: Fixed by using Jest fake timers in OpenMeteoDataSource.test.ts. Trade-off: Simplified testing but requires careful timer management.
 
 ## Potential Improvements
 
-- **Distributed Caching: Integrate Redis for scalable, persistent caching.**
-- **Query Complexity Limits: Use Apollo plugins to prevent complex query attacks.**
-- **Additional Features: Add mutations for saving travel plans or filters for city suggestions.**
-- **Monitoring: Integrate Prometheus for metrics and advanced logging.**
-- **Integration Tests: Expand tests/integration/ with more end-to-end scenarios.**
-- **Schema Extensions: Add types/queries for hotel recommendations or travel itineraries.**
+- Distributed Caching: Integrate Redis for scalable, persistent caching.
+- Query Complexity Limits: Use Apollo plugins to prevent complex query attacks.
+- Additional Features: Add mutations for saving travel plans or filters for city suggestions.
+- Monitoring: Integrate Prometheus for metrics and advanced logging.
+- Integration Tests: Expand tests/integration/ with more end-to-end scenarios.
+- Schema Extensions: Add types/queries for hotel recommendations or travel itineraries.
 
 ## Use of AI
-I guided the AI in terms of directions to follow, ensuring alignment with project requirements and best practices. Grok, an AI assistant developed by xAI, was instrumental in the development of this project, particularly in the following areas:
+I led the design and development of this project, adopting a modular structure and ensuring all implementation decisions aligned with project goals and best practices. Grok—an AI assistant developed by xAI—was used as a collaborative tool, with its suggestions guided, reviewed, and refined before implementation.
 
-- Accessing the Open-Meteo API: I asked Grok to access the Open Meteo API, and based on the documentation to provide a roadmap. Grok offered guidance on integrating with Open-Meteo’s geocoding and forecast APIs, including structuring HTTP requests and implementing retry logic for transient errors (e.g., 429, network issues).
-- Implementation Roadmap: Based on my request for Grok to access the Open Meteo API and provide a roadmap grounded in the documentation, Grok proposed a structured plan for implementation. This included prioritizing a modular architecture (presentation, business logic, data access layers), defining the GraphQL schema with TypeScript codegen, and implementing heuristic-based activity ranking. The roadmap guided the development of resolvers.ts, activityRanking.ts, and the testing strategy.
-- Evaluation and Validation: Each output from Grok was meticulously evaluated against project requirements and Open-Meteo’s API specifications. Suggestions were carefully revised and improved before implementation by cross-referencing with documentation to verify correct endpoints (/search, /forecast) and parameters (e.g., forecast_days). 
-- Iterative Refinement: Grok’s suggestions underwent an iterative process of review, improvement, and validation. Outputs were scrutinized, and enhancements were made before implementation—such as refining test configurations to address cache initialization failures by incorporating Jest fake timers and detailed mock setups. 
+- Accessing the Open-Meteo API: I directed Grok to review the Open-Meteo API documentation and propose an initial plan for integration. Its suggestions covered aspects such as request structuring and retry logic for transient errors (e.g., HTTP 429, network issues). These were reviewed for accuracy, cross-referenced with documentation, and adjusted as needed before implementation.
 
+- Implementation Roadmap: I chose a modular architecture—separating presentation, business logic, and data access layers. I guided Grok to outline steps such as defining the GraphQL schema with TypeScript codegen, implementing heuristic-based activity ranking, and integrating Axios with retry logic and LRU caching for API calls. I refined this plan and applied it in developing key modules, including resolvers.ts, activityRanking.ts, OpenMeteoDataSource.ts, and the testing framework, keeping a clear, step-by-step roadmap in front of me to follow efficiently and iteratively reviewing outputs to ensure alignment with project requirements and the Open-Meteo API specifications.
+
+- Evaluation and Validation: Each AI-generated suggestion was assessed against project requirements and the Open-Meteo API specifications. Endpoints (e.g., /search, /forecast) and parameters (e.g., forecast_days) were confirmed before integration.
+
+- Iterative Refinement: Outputs went through multiple review cycles, with targeted improvements made before implementation. For example, testing configurations were refined to address cache initialization issues by introducing Jest fake timers and detailed mock setups to ensure reliability.
 
 ## Query Examples
 Below are sample GraphQL queries for the implemented features, using the schema defined in src/schema/types.ts.
